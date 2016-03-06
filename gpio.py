@@ -12,12 +12,11 @@ def on_click(channel):
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-GPIO.add_event_detect(17, GPIO.RISING, callback=on_click)
-print 'ready...'
+GPIO.add_event_detect(17, GPIO.RISING, callback=on_click, bouncetime=200)
+print 'ready... (Press Enter to exit)'
 
 try:
-    raw_input('Press Enter to exit')
-
+    raw_input()
 except KeyboardInterrupt:
     GPIO.cleanup()
 
