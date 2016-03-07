@@ -50,6 +50,9 @@ def setup_gpio():
 setup_mpd()  # setup mpd client
 setup_gpio()
 
+client.play()
+client.pause(1)
+
 print 'ready... (Press Enter to exit)'
 try:
     raw_input()
