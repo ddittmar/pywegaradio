@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
