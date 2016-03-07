@@ -1,3 +1,5 @@
 *.iml
+*.pyc
 .idea/
 doc/
+python-mpd2/
