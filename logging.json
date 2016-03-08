@@ -14,7 +14,7 @@
     }
   },
   "loggers": {
-    "simpleExample": {
+    "daemon": {
       "level": "DEBUG",
       "handlers": [
         "console"

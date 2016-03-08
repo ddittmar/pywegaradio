@@ -6,7 +6,7 @@ import logging
 import logging.config
 
 
-def config_logging():
+def configure_logging():
     """
     configures logging for this script
     """
@@ -14,9 +14,15 @@ def config_logging():
         data = json.load(logging_json)
     logging.config.dictConfig(data)
     global logger  # configure a global logger object
-    logger = logging.getLogger("simpleExample")
+    logger = logging.getLogger("daemon")
 
 
-config_logging()
+configure_logging()
 
-logger.debug("foooooooooooooo!")
+logger.info("start")
+try:
+    raw_input()
+except KeyboardInterrupt:
+    logger.info("KeyboardInterrupt")  # on Ctrl+c
+
+logger.info("exit")  # normal exit
