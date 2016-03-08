@@ -1,17 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
+import json
 import logging
-# logging.basicConfig()
+import logging.config
 
-log = logging.getLogger('daemon.py')
-log.setLevel(logging.DEBUG)
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(logging.Formatter('%(asctime)s (%(name)s) [%(levelname)s] - %(message)s'))
-log.addHandler(handler)
 
-log.debug("test?")
-log.info("test?")
-log.warn("test?")
-log.error("test?")
+def config_logging():
+    """
+    configures logging for this script
+    """
+    with open("logging.json") as logging_json:
+        data = json.load(logging_json)
+    logging.config.dictConfig(data)
+    global logger  # configure a global logger object
+    logger = logging.getLogger("simpleExample")
+
+
+config_logging()
+
+logger.debug("foooooooooooooo!")
