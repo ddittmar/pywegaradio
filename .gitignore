@@ -1,5 +1,6 @@
 *.iml
 *.pyc
+*.log
 .idea/
 doc/
 python-mpd2/

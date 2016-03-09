@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import sys
 import json
 import logging
 import logging.config
@@ -18,21 +19,27 @@ class MyLogger(object):
             self.logger.log(self.level, message.rstrip())
 
 
-def configure_logging():
-    with open("logging.json") as logging_json:
+def configure_logging(logging_conf_filename):
+    with open(logging_conf_filename) as logging_json:
         data = json.load(logging_json)
     logging.config.dictConfig(data)
-    global logger  # configure a global logger object
-    logger = logging.getLogger("daemon")
+    global log  # configure a global logger
+    log = logging.getLogger("daemon")
+
+    # Replace stdout with logging to file at DEBUG level
+    sys.stdout = MyLogger(log, logging.DEBUG)
+    # Replace stderr with logging to file at ERROR level
+    sys.stderr = MyLogger(log, logging.ERROR)
 
 
-configure_logging()
+configure_logging("logging.json")
 
-logger.info("start")
+log.info("start")
 try:
     while True:
-        time.sleep(60)  # sleep 60s
+        time.sleep(10)  # sleep in seconds
+        log.debug("wakeup...")
 except KeyboardInterrupt:
-    logger.info("KeyboardInterrupt")  # on Ctrl+c
+    log.info("KeyboardInterrupt")  # on Ctrl+c
 
-logger.info("exit")  # normal exit
+log.info("exit")  # normal exit
