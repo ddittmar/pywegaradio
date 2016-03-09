@@ -4,6 +4,7 @@
 import time
 import sys
 import json
+import argparse
 import logging
 import logging.config
 
@@ -32,9 +33,14 @@ def configure_logging(logging_conf_filename):
     sys.stderr = MyLogger(log, logging.ERROR)
 
 
-# TODO parameter einlesen um die Logging-Config zu finden
+def parse_args():
+    parser = argparse.ArgumentParser(description="logging deamon")
+    parser.add_argument("-l", "--logging", help="filename of the logging config (JSON)", required=True)
+    return parser.parse_args()
 
-configure_logging("logging.json")
+
+args = parse_args()
+configure_logging(args.logging)
 
 log.info("start")
 try:
