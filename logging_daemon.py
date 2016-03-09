@@ -5,6 +5,7 @@ import time
 import sys
 import json
 import argparse
+import os
 import logging
 import logging.config
 
@@ -38,16 +39,20 @@ def parse_args():
     parser.add_argument("-l", "--logging", help="filename of the logging config (JSON)", required=True)
     return parser.parse_args()
 
+if __name__ == '__main__':
 
-args = parse_args()
-configure_logging(args.logging)
+    args = parse_args()
+    configure_logging(args.logging)
 
-log.info("start")
-try:
-    while True:
-        time.sleep(10)  # sleep in seconds
-        log.debug("wakeup...")
-except KeyboardInterrupt:
-    log.info("Interrupt")  # on Ctrl+c
+    log.debug('realpath: {}'.format(os.path.realpath(__file__)))
+    log.debug('dirname: {}'.format(os.path.dirname(__file__)))
 
-log.info("exit")  # normal exit
+    log.info("start")
+    try:
+        while True:
+            time.sleep(10)  # sleep in seconds
+            log.debug("wakeup...")
+    except KeyboardInterrupt:
+        log.info("Interrupt")  # on Ctrl+c
+
+    log.info("exit")  # normal exit
