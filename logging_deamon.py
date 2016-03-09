@@ -32,6 +32,8 @@ def configure_logging(logging_conf_filename):
     sys.stderr = MyLogger(log, logging.ERROR)
 
 
+# TODO parameter einlesen um die Logging-Config zu finden
+
 configure_logging("logging.json")
 
 log.info("start")
@@ -40,6 +42,6 @@ try:
         time.sleep(10)  # sleep in seconds
         log.debug("wakeup...")
 except KeyboardInterrupt:
-    log.info("KeyboardInterrupt")  # on Ctrl+c
+    log.info("Interrupt")  # on Ctrl+c
 
 log.info("exit")  # normal exit
