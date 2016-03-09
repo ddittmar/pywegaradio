@@ -16,7 +16,7 @@
       "class": "logging.handlers.TimedRotatingFileHandler",
       "level": "DEBUG",
       "formatter": "simple",
-      "filename": "logging_deamon.log",
+      "filename": "logging_daemon.log",
       "when": "midnight",
       "backupCount": "5"
     }
