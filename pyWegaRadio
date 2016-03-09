@@ -10,7 +10,8 @@
 # Description:       Wega Radio Python Daemon
 ### END INIT INFO
 
-DIR=/home/pi/
+# Edit this to your needs
+DIR=/home/pi
 DAEMON=$DIR/deamon.py
 DAEMON_NAME=pyWegaRadio
 
@@ -33,7 +34,7 @@ do_start () {
 }
 do_stop () {
     log_daemon_msg "Stopping system $DAEMON_NAME daemon"
-    start-stop-daemon --stop --pidfile $PIDFILE --retry 10
+    start-stop-daemon --stop --pidfile $PIDFILE --retry 10 --remove-pidfile
     log_end_msg $?
 }
 
