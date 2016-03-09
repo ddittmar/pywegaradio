@@ -2,7 +2,7 @@
   "version": 1,
   "formatters": {
     "simple": {
-      "format": "%(asctime)s [%(levelname)s]: %(message)s"
+      "format": "%(asctime)s (%(name)s) [%(levelname)s]: %(message)s"
     }
   },
   "handlers": {
@@ -16,13 +16,20 @@
       "class": "logging.handlers.TimedRotatingFileHandler",
       "level": "DEBUG",
       "formatter": "simple",
-      "filename": "logging_daemon.log",
+      "filename": "pyWegaRadio.log",
       "when": "midnight",
       "backupCount": "5"
     }
   },
   "loggers": {
     "daemon": {
+      "level": "DEBUG",
+      "handlers": [
+        "console", "file"
+      ],
+      "propagate": false
+    },
+    "musicDaemonClient": {
       "level": "DEBUG",
       "handlers": [
         "console", "file"
