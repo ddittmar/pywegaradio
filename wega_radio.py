@@ -48,15 +48,18 @@ def load_config():
     args = parser.parse_args()
     with open(args.config) as application_config:
         cfg = json.load(application_config)
-    # TODO hier defaults einsetzen falls sie nicht gesetzt wurden
+    # setting defaults
+    cfg['mpd_host'] = cfg['mpd_client'] if 'mpd_host' in cfg else 'localhost'
+    cfg['mpd_port'] = cfg['mpd_port'] if 'mpd_port' in cfg else 6600
     return cfg
+
 
 if __name__ == '__main__':
     config = load_config()
     configure_logging(os.path.dirname(__file__) + '/' + config['logging'])
     log = logging.getLogger("daemon")
 
-    log.info("start")
+    log.info("start...")
 
     musicClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
     # TODO hier noch GPIO hoch fahren
@@ -67,4 +70,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         log.info("KeyboardInterrupt")  # on Ctrl+c
 
-    log.info("exit")  # normal exit
+    log.info("shutting down")  # normal exit
+    musicClient.shutdown()
+    log.info("done...")
