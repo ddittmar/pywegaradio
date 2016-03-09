@@ -12,7 +12,7 @@
 
 # Edit this to your needs
 DIR=/home/pi
-DAEMON=${DIR}/deamon.py
+DAEMON=${DIR}/wega_radio.py
 DAEMON_NAME=pyWegaRadio
 
 # Add any command line options for your daemon here
