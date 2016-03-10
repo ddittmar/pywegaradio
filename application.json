@@ -1,3 +1,73 @@
 {
-  "logging": "logging.json"
+  "logging": {
+    "version": 1,
+    "formatters": {
+      "simple": {
+        "format": "%(asctime)s (%(name)s) [%(levelname)s]: %(message)s"
+      }
+    },
+    "handlers": {
+      "console": {
+        "class": "logging.StreamHandler",
+        "level": "DEBUG",
+        "formatter": "simple",
+        "stream": "ext://sys.stdout"
+      },
+      "file": {
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "level": "DEBUG",
+        "formatter": "simple",
+        "filename": "pyWegaRadio.log",
+        "when": "midnight",
+        "backupCount": "5"
+      }
+    },
+    "loggers": {
+      "daemon": {
+        "level": "DEBUG",
+        "handlers": [
+          "console",
+          "file"
+        ],
+        "propagate": false
+      },
+      "MusicDaemonClient": {
+        "level": "DEBUG",
+        "handlers": [
+          "console",
+          "file"
+        ],
+        "propagate": false
+      },
+      "GpioClient": {
+        "level": "DEBUG",
+        "handlers": [
+          "console",
+          "file"
+        ],
+        "propagate": false
+      },
+      "WegaRadioControl": {
+        "level": "DEBUG",
+        "handlers": [
+          "console",
+          "file"
+        ],
+        "propagate": false
+      }
+    },
+    "root": {
+      "level": "DEBUG",
+      "handlers": [
+        "console",
+        "file"
+      ]
+    }
+  },
+  "stations": [
+    {
+      "name": "Radio Hamburg",
+      "uri": "http://radiohamburg.hoerradar.de/radiohamburg-live-mp3-128"
+    }
+  ]
 }
