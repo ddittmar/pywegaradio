@@ -206,7 +206,7 @@ if __name__ == '__main__':
     log = logging.getLogger("daemon")  # get the global "daemon" logger
     sys.excepthook = _excepthook  # register custom exception hook
 
-    log.info("start main loop...")
+    log.info("start...")
     radioControl = WegaRadioControl()
     try:
         while True:
@@ -216,4 +216,4 @@ if __name__ == '__main__':
         log.info("KeyboardInterrupt: Ctrl+c")  # on Ctrl+C
 
     radioControl.teardown()
-    log.info("exit main loop...")
+    log.info("exit...")
