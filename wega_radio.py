@@ -7,6 +7,7 @@ import json
 import argparse
 import logging
 import logging.config
+from pprint import (PrettyPrinter)
 
 from mpd import (MPDClient)
 
@@ -29,11 +30,13 @@ class MusicDaemonClient:
         """
         self.log = logging.getLogger("MusicDaemonClient")
         self.client = MPDClient(use_unicode=True)
+
         self.host = mpd_host
         self.port = mpd_port
 
         # test the mpd connection
         self._connect()
+        self.log.info("MPD Version: {}".format(self.client.mpd_version))  # print the version of the daemon
         self._disconnect()
 
     def _connect(self):
@@ -73,6 +76,15 @@ class MusicDaemonClient:
         self._play(uri)
         self._disconnect()
 
+    def status(self):
+        return self.client.status()
+
+    def stats(self):
+        return self.client.stats()
+
+    def curr_song(self):
+        return self.client.currentsong()
+
     def teardown(self):
         """
         teardown this instance. The instance is unusable after this call!
@@ -93,7 +105,8 @@ class GpioClient:
         GPIO.setmode(GPIO.BCM)
         self.log.info("RPi.GPIO Version: {}".format(GPIO.VERSION))
 
-    def add_input_channel_callback(self, channel, rise_fall, callback):
+    @staticmethod
+    def add_input_channel_callback(channel, rise_fall, callback):
         """
         Set the specified channel as input channel and adds a callback
         :param channel: the number of the GPIO channel (BCM)
@@ -124,13 +137,14 @@ class WegaRadioControl:
         self.mpdClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
         self.gpioClient = GpioClient()
         self.stations = dict()
+        self.pp = PrettyPrinter(indent=2)
 
         # configure the station callbacks
         self._setup_stations(config['stations'])
 
         # register a callback to switch the radio off
         self.log.info(
-            "register callback for the off switch on channel {}".format(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL))
+            "register callback for the 'off' button on channel {}".format(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL))
         self.gpioClient.add_input_channel_callback(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL, GPIO.FALLING,
                                                    self._switch_off_callback)
 
@@ -169,6 +183,14 @@ class WegaRadioControl:
         self.log.info("switch to station: {}".format(station['name']))
         self.mpdClient.play(station['uri'])
 
+    def log_mpd_status(self):
+        status = self.mpdClient.status()
+        self.log.info("MPD Status: {}".format(self.pp.pprint(status)))
+        stats = self.mpdClient.stats()
+        self.log.info("MPD Stats: {}".format(self.pp.pprint(stats)))
+        curr_song = self.mpdClient.curr_song()
+        self.log.info("MPD Current Song: {}".format(self.pp.pprint(curr_song)))
+
     def teardown(self):
         """
         This instance is unusable after this call!
@@ -176,6 +198,17 @@ class WegaRadioControl:
         self.log.info("teardown")
         self.mpdClient.teardown()
         self.gpioClient.teardown()
+
+
+class MyLogger:
+    def __init__(self, logger, level):
+        self.logger = logger
+        self.level = level
+
+    def write(self, message):
+        # Only log if there is a message (not just a new line)
+        if message.rstrip() != "":
+            self.logger.log(self.level, message.rstrip())
 
 
 def load_config():
@@ -196,22 +229,23 @@ def load_config():
     return cfg
 
 
-def _excepthook(exc_type, exc_value, exc_traceback):
-    log.error("Uncaught exception! {}: {}".format(exc_type, exc_value), exc_info=(exc_type, exc_value, exc_traceback))
-
-
 if __name__ == '__main__':
     config = load_config()  # load the config file
     logging.config.dictConfig(config['logging'])  # configure logging
     log = logging.getLogger("daemon")  # get the global "daemon" logger
-    sys.excepthook = _excepthook  # register custom exception hook
+
+    # Replace stdout with logging to file at DEBUG level
+    sys.stdout = MyLogger(log, logging.DEBUG)
+    # Replace stderr with logging to file at ERROR level
+    sys.stderr = MyLogger(log, logging.ERROR)
 
     log.info("start...")
     radioControl = WegaRadioControl()
     try:
         while True:
             time.sleep(300)  # sleep in seconds
-            log.debug("still alive...")
+            log.info("still alive...")
+            radioControl.log_mpd_status()
     except KeyboardInterrupt:
         log.info("KeyboardInterrupt: Ctrl+c")  # on Ctrl+C
 
