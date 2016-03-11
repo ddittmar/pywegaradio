@@ -91,6 +91,7 @@ class GpioClient:
     def __init__(self):
         self.log = logging.getLogger("GpioClient")
         GPIO.setmode(GPIO.BCM)
+        self.log.info("RPi.GPIO Version: {}".format(GPIO.VERSION))
 
     def add_input_channel_callback(self, channel, rise_fall, callback):
         """
@@ -99,7 +100,6 @@ class GpioClient:
         :param rise_fall: fire the callback at a rising edge or a falling edge
         :param callback: the callback to fire
         """
-        self.log.debug("add input channel callback for channel: {}".format(channel))
         GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(channel, rise_fall, callback=callback, bouncetime=300)
 

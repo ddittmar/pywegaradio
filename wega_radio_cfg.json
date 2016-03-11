@@ -54,6 +54,14 @@
           "file"
         ],
         "propagate": false
+      },
+      "mpd": {
+        "level": "WARN",
+        "handlers": [
+          "console",
+          "file"
+        ],
+        "propagate": false
       }
     },
     "root": {
