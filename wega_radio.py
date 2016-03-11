@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import time
 import json
 import argparse
@@ -195,12 +196,15 @@ def load_config():
     return cfg
 
 
-if __name__ == '__main__':
-    config = load_config()
-    logging.config.dictConfig(config['logging'])  # configure logging
+def _excepthook(exc_type, exc_value, exc_traceback):
+    log.error("Uncaught exception! {}: {}".format(exc_type, exc_value), exc_info=(exc_type, exc_value, exc_traceback))
 
-    # get the global "deamon" logger
-    log = logging.getLogger("daemon")
+
+if __name__ == '__main__':
+    config = load_config()  # load the config file
+    logging.config.dictConfig(config['logging'])  # configure logging
+    log = logging.getLogger("daemon")  # get the global "daemon" logger
+    sys.excepthook = _excepthook  # register custom exception hook
 
     log.info("start main loop...")
     radioControl = WegaRadioControl()
@@ -209,8 +213,7 @@ if __name__ == '__main__':
             time.sleep(300)  # sleep in seconds
             log.debug("still alive...")
     except KeyboardInterrupt:
-        log.info("KeyboardInterrupt")  # on Ctrl+C
+        log.info("KeyboardInterrupt: Ctrl+c")  # on Ctrl+C
 
-    log.info("shutting down")  # normal exit
     radioControl.teardown()
     log.info("exit main loop...")
