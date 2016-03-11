@@ -28,34 +28,58 @@ class MusicDaemonClient:
         """
         self.log = logging.getLogger("MusicDaemonClient")
         self.client = MPDClient(use_unicode=True)
-        self.client.connect(mpd_host, mpd_port)
-        self.log.debug("mpd connected at {}:{}".format(mpd_host, mpd_port))
+        self.host = mpd_host
+        self.port = mpd_port
+
+        # test the mpd connection
+        self._connect()
+        self._disconnect()
+
+    def _connect(self):
+        self.client.connect(self.host, self.port)
+        self.log.debug("mpd connected at {}:{}".format(self.host, self.port))
+
+    def _disconnect(self):
+        self.client.close()
+        self.client.disconnect()
+        self.log.debug("mpd disconnected")
+
+    def _stop(self):
+        self.client.stop()  # stop playing
+        self.client.clear()  # clear queue
+
+    def _play(self, uri):
+        self.client.add(uri)
+        self.client.play()
 
     def stop(self):
         """
         stop playback
         """
         self.log.debug("stop playback and clear the queue")
-        self.client.stop()  # stop playing
-        self.client.clear()  # clear queue
+        self._connect()
+        self._stop()
+        self._disconnect()
 
     def play(self, uri):
         """
         start playback
         :param uri: the uri to play
         """
-        self.stop()
         self.log.debug("play: {}".format(uri))
-        self.client.add(uri)
-        self.client.play()
+        self._connect()
+        self._stop()
+        self._play(uri)
+        self._disconnect()
 
     def teardown(self):
         """
         teardown this instance. The instance is unusable after this call!
         """
         self.log.debug("teardown")
-        self.stop()
-        self.client.disconnect()  # disconnect from mpd
+        self._connect()
+        self._stop()
+        self._disconnect()
 
 
 class GpioClient:
