@@ -77,13 +77,25 @@ class MusicDaemonClient:
         self._disconnect()
 
     def status(self):
-        return self.client.status()
+        self._connect()
+        try:
+            return self.client.status()
+        finally:
+            self._disconnect()
 
     def stats(self):
-        return self.client.stats()
+        self._connect()
+        try:
+            return self.client.stats()
+        finally:
+            self._disconnect()
 
     def curr_song(self):
-        return self.client.currentsong()
+        self._connect()
+        try:
+            return self.client.currentsong()
+        finally:
+            self._disconnect()
 
     def teardown(self):
         """
@@ -137,7 +149,6 @@ class WegaRadioControl:
         self.mpdClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
         self.gpioClient = GpioClient()
         self.stations = dict()
-        self.pp = PrettyPrinter(indent=2)
 
         # configure the station callbacks
         self._setup_stations(config['stations'])
@@ -185,11 +196,11 @@ class WegaRadioControl:
 
     def log_mpd_status(self):
         status = self.mpdClient.status()
-        self.log.info("MPD Status: {}".format(self.pp.pprint(status)))
+        self.log.info("MPD Status: {}".format(status))
         stats = self.mpdClient.stats()
-        self.log.info("MPD Stats: {}".format(self.pp.pprint(stats)))
+        self.log.info("MPD Stats: {}".format(stats))
         curr_song = self.mpdClient.curr_song()
-        self.log.info("MPD Current Song: {}".format(self.pp.pprint(curr_song)))
+        self.log.info("MPD Current Song: {}".format(curr_song))
 
     def teardown(self):
         """
