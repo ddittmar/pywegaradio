@@ -7,7 +7,6 @@ import json
 import argparse
 import logging
 import logging.config
-from pprint import (PrettyPrinter)
 
 from mpd import (MPDClient)
 
