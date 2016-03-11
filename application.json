@@ -66,8 +66,16 @@
   },
   "stations": [
     {
-      "name": "Radio Hamburg",
-      "uri": "http://radiohamburg.hoerradar.de/radiohamburg-live-mp3-128"
+      "name": "Alster Radio",
+      "uri": "http://live96.106acht.de"
+    },
+    {
+      "name": "Hamburg Zwei",
+      "uri": "http://stream.hamburg-zwei.de/hh2-live/mp3-192/hh2mediaplayer"
+    },
+    {
+      "name": "FFH Weihnachtsradio",
+      "uri": "http://mp3.ffh.de/fs_ffhchannels/hqxmas.mp3"
     }
   ]
 }
