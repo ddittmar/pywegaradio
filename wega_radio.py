@@ -74,7 +74,7 @@ class GpioClient:
         :param rise_fall: fire the callback at a rising edge or a falling edge
         :param callback: the callback to fire
         """
-        self.log("add input channel callback for channel: {}".format(channel))
+        self.log.debug("add input channel callback for channel: {}".format(channel))
         GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(channel, rise_fall, callback=callback, bouncetime=300)
 
@@ -104,6 +104,8 @@ class WegaRadioControl:
         self._setup_stations(config['stations'])
 
         # register a callback to switch the radio off
+        self.log.info(
+            "register callback for the off switch on channel {}".format(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL))
         self.gpioClient.add_input_channel_callback(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL, GPIO.FALLING,
                                                    self._switch_off_callback)
 
@@ -112,7 +114,6 @@ class WegaRadioControl:
         Setup the stations
         :param stations: a list with stations
         """
-        self.log.debug("setup stations")
 
         if len(stations) > 4:
             self.log.warn("You defined more than 4 stations. I only setup the first 4 stations in your list.")
@@ -123,8 +124,9 @@ class WegaRadioControl:
         num_stations = 4 if len(stations) >= 4 else len(stations)
         for i in range(num_stations):
             ch = WegaRadioControl.RADIO_GPIO_CHANNELS[i]
-            self.gpioClient.add_input_channel_callback(ch, GPIO.RISING, self._switch_to_station)
             self.stations[ch] = stations[i]
+            self.log.info("register callback for '{}' on channel {}".format(stations[i]['name'], ch))
+            self.gpioClient.add_input_channel_callback(ch, GPIO.RISING, self._switch_to_station)
 
     def _switch_off_callback(self):
         """
@@ -146,7 +148,7 @@ class WegaRadioControl:
         """
         This instance is unusable after this call!
         """
-        self.log.debug("teardown")
+        self.log.info("teardown")
         self.mpdClient.teardown()
         self.gpioClient.teardown()
 
