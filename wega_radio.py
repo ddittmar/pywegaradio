@@ -41,12 +41,10 @@ class MusicDaemonClient:
 
     def _connect(self):
         self.client.connect(self.host, self.port)
-        self.log.debug("mpd connected at {}:{}".format(self.host, self.port))
 
     def _disconnect(self):
         self.client.close()
         self.client.disconnect()
-        self.log.debug("mpd disconnected")
 
     def _stop(self):
         self.client.stop()  # stop playing
