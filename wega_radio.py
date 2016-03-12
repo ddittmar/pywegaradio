@@ -74,8 +74,8 @@ class MusicDaemonClient:
         self._disconnect()
 
     def info(self):
+        self._connect()
         try:
-            self._connect()
             res = dict()
             res['status'] = self.client.status()
             res['stats'] = self.client.stats()
