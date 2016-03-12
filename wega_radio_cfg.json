@@ -17,7 +17,7 @@
         "class": "logging.handlers.TimedRotatingFileHandler",
         "level": "DEBUG",
         "formatter": "simple",
-        "filename": "pyWegaRadio.log",
+        "filename": "/var/log/pyWegaRadio.log",
         "when": "midnight",
         "backupCount": "5"
       }
