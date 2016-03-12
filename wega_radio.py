@@ -73,24 +73,14 @@ class MusicDaemonClient:
         self._play(uri)
         self._disconnect()
 
-    def status(self):
-        self._connect()
+    def info(self):
         try:
-            return self.client.status()
-        finally:
-            self._disconnect()
-
-    def stats(self):
-        self._connect()
-        try:
-            return self.client.stats()
-        finally:
-            self._disconnect()
-
-    def curr_song(self):
-        self._connect()
-        try:
-            return self.client.currentsong()
+            self._connect()
+            res = dict()
+            res['status'] = self.client.status()
+            res['stats'] = self.client.stats()
+            res['current_song'] = self.client.currentsong()
+            return res
         finally:
             self._disconnect()
 
@@ -191,14 +181,6 @@ class WegaRadioControl:
         self.log.info("switch to station: {}".format(station['name']))
         self.mpdClient.play(station['uri'])
 
-    def log_mpd_status(self):
-        status = self.mpdClient.status()
-        self.log.info("MPD Status: {}".format(status))
-        stats = self.mpdClient.stats()
-        self.log.info("MPD Stats: {}".format(stats))
-        curr_song = self.mpdClient.curr_song()
-        self.log.info("MPD Current Song: {}".format(curr_song))
-
     def teardown(self):
         """
         This instance is unusable after this call!
@@ -209,6 +191,9 @@ class WegaRadioControl:
 
 
 class MyLogger:
+    """
+    Class to redirect stdout und stderr to the logging files
+    """
     def __init__(self, logger, level):
         self.logger = logger
         self.level = level
@@ -217,6 +202,17 @@ class MyLogger:
         # Only log if there is a message (not just a new line)
         if message.rstrip() != "":
             self.logger.log(self.level, message.rstrip())
+
+
+def log_mpd_status(music_daemon_client):
+    """
+    Write the status of the MPD to the log
+    :param music_daemon_client: the MusicDaemonClient
+    """
+    info = music_daemon_client.info()
+    log.info("MPD Status: {}".format(info['status']))
+    log.info("MPD Stats: {}".format(info['stats']))
+    log.info("MPD Current Song: {}".format(info['current_song']))
 
 
 def load_config():
@@ -248,12 +244,13 @@ if __name__ == '__main__':
     sys.stderr = MyLogger(log, logging.ERROR)
 
     log.info("start...")
+    musicDaemonClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
     radioControl = WegaRadioControl()
     try:
         while True:
             time.sleep(300)  # sleep in seconds
             log.info("still alive...")
-            radioControl.log_mpd_status()
+            log_mpd_status(musicDaemonClient)
     except KeyboardInterrupt:
         log.info("KeyboardInterrupt: Ctrl+c")  # on Ctrl+C
 
