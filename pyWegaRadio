@@ -8,6 +8,7 @@
 # Default-Stop:      0 1 6
 # Short-Description: Wega Radio Python Daemon
 # Description:       Wega Radio Python Daemon
+# After:             mpd.service
 ### END INIT INFO
 
 # Edit this to your needs
