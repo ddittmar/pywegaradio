@@ -93,7 +93,11 @@ class MusicDaemonClient:
         self._disconnect()
 
     def mpd_version(self):
-        return self.client.mpd_version
+        self._connect()
+        try:
+            return self.client.mpd_version
+        finally:
+            self._disconnect()
 
 
 class GpioClient:
