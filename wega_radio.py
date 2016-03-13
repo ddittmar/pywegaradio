@@ -35,7 +35,6 @@ class MusicDaemonClient:
 
         # test the mpd connection
         self._connect()
-        self.log.info("MPD Version: {}".format(self.client.mpd_version))  # print the version of the daemon
         self._disconnect()
 
     def _connect(self):
@@ -92,6 +91,9 @@ class MusicDaemonClient:
         self._connect()
         self._stop()
         self._disconnect()
+
+    def mpd_version(self):
+        return self.client.mpd_version
 
 
 class GpioClient:
@@ -244,7 +246,11 @@ if __name__ == '__main__':
     sys.stderr = MyLogger(log, logging.ERROR)
 
     log.info("start...")
+
     musicDaemonClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
+    log.info("MPD Version: {}".format(musicDaemonClient.mpd_version()))  # print the version of the daemon
+    log_mpd_status(musicDaemonClient)
+
     radioControl = WegaRadioControl()
     try:
         while True:
