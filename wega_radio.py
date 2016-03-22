@@ -110,14 +110,14 @@ class GpioClient:
         GPIO.setmode(GPIO.BCM)
         self.__log.info("RPi.GPIO Version: {}".format(GPIO.VERSION))
 
-    @staticmethod
-    def add_input_channel_callback(channel, rise_fall, callback):
+    def add_input_channel_callback(self, channel, rise_fall, callback):
         """
         Set the specified channel as input channel and adds a callback
         :param channel: the number of the GPIO channel (BCM)
         :param rise_fall: fire the callback at a rising edge or a falling edge
         :param callback: the callback to fire
         """
+        self.__log("register callback for channel {}".format(channel))
         GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(channel, rise_fall, callback=callback, bouncetime=300)
 
