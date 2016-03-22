@@ -27,77 +27,77 @@ class MusicDaemonClient:
         :param mpd_host: The name of the host (e.g. localhost)
         :param mpd_port: The port of the daemon (e.g. 6600)
         """
-        self.log = logging.getLogger("MusicDaemonClient")
-        self.client = MPDClient(use_unicode=True)
+        self.__log = logging.getLogger("MusicDaemonClient")
+        self.__client = MPDClient(use_unicode=True)
 
-        self.host = mpd_host
-        self.port = mpd_port
+        self.__host = mpd_host
+        self.__port = mpd_port
 
         # test the mpd connection
-        self._connect()
-        self._disconnect()
+        self.__connect()
+        self.__disconnect()
 
-    def _connect(self):
-        self.client.connect(self.host, self.port)
+    def __connect(self):
+        self.__client.connect(self.__host, self.__port)
 
-    def _disconnect(self):
-        self.client.close()
-        self.client.disconnect()
+    def __disconnect(self):
+        self.__client.close()
+        self.__client.disconnect()
 
-    def _stop(self):
-        self.client.stop()  # stop playing
-        self.client.clear()  # clear queue
+    def __stop(self):
+        self.__client.stop()  # stop playing
+        self.__client.clear()  # clear queue
 
-    def _play(self, uri):
-        self.client.add(uri)
-        self.client.play()
+    def __play(self, uri):
+        self.__client.add(uri)
+        self.__client.play()
 
     def stop(self):
         """
         stop playback
         """
-        self.log.debug("stop playback and clear the queue")
-        self._connect()
-        self._stop()
-        self._disconnect()
+        self.__log.debug("stop playback and clear the queue")
+        self.__connect()
+        self.__stop()
+        self.__disconnect()
 
     def play(self, uri):
         """
         start playback
         :param uri: the uri to play
         """
-        self.log.debug("play: {}".format(uri))
-        self._connect()
-        self._stop()
-        self._play(uri)
-        self._disconnect()
+        self.__log.debug("play: {}".format(uri))
+        self.__connect()
+        self.__stop()
+        self.__play(uri)
+        self.__disconnect()
 
     def info(self):
-        self._connect()
+        self.__connect()
         try:
             res = dict()
-            res['status'] = self.client.status()
-            res['stats'] = self.client.stats()
-            res['current_song'] = self.client.currentsong()
+            res['status'] = self.__client.status()
+            res['stats'] = self.__client.stats()
+            res['current_song'] = self.__client.currentsong()
             return res
         finally:
-            self._disconnect()
+            self.__disconnect()
 
     def teardown(self):
         """
         teardown this instance. The instance is unusable after this call!
         """
-        self.log.debug("teardown")
-        self._connect()
-        self._stop()
-        self._disconnect()
+        self.__log.debug("teardown")
+        self.__connect()
+        self.__stop()
+        self.__disconnect()
 
     def mpd_version(self):
-        self._connect()
+        self.__connect()
         try:
-            return self.client.mpd_version
+            return self.__client.mpd_version
         finally:
-            self._disconnect()
+            self.__disconnect()
 
 
 class GpioClient:
@@ -106,9 +106,9 @@ class GpioClient:
     """
 
     def __init__(self):
-        self.log = logging.getLogger("GpioClient")
+        self.__log = logging.getLogger("GpioClient")
         GPIO.setmode(GPIO.BCM)
-        self.log.info("RPi.GPIO Version: {}".format(GPIO.VERSION))
+        self.__log.info("RPi.GPIO Version: {}".format(GPIO.VERSION))
 
     @staticmethod
     def add_input_channel_callback(channel, rise_fall, callback):
@@ -125,7 +125,7 @@ class GpioClient:
         """
         teardown this instance. GPIO is unusable after this call!
         """
-        self.log.debug("teardown")
+        self.__log.debug("teardown")
         GPIO.cleanup()
 
 
@@ -138,68 +138,69 @@ class WegaRadioControl:
     RADIO_GPIO_CHANNELS = [5, 6, 13, 19]
 
     def __init__(self):
-        self.log = logging.getLogger("WegaRadioControl")
-        self.mpdClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
-        self.gpioClient = GpioClient()
-        self.stations = dict()
+        self.__log = logging.getLogger("WegaRadioControl")
+        self.__mpdClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
+        self.__gpioClient = GpioClient()
+        self.__stations = dict()
 
         # configure the station callbacks
-        self._setup_stations(config['stations'])
+        self.__setup_stations(config['stations'])
 
         # register a callback to switch the radio off
-        self.log.info(
+        self.__log.info(
             "register callback for the 'off' button on channel {}".format(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL))
-        self.gpioClient.add_input_channel_callback(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL, GPIO.FALLING,
-                                                   self._switch_off_callback)
+        self.__gpioClient.add_input_channel_callback(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL, GPIO.FALLING,
+                                                     self.__switch_off_callback)
 
-    def _setup_stations(self, stations):
+    def __setup_stations(self, stations):
         """
         Setup the stations
         :param stations: a list with stations
         """
 
         if len(stations) > 4:
-            self.log.warn("You defined more than 4 stations. I only setup the first 4 stations in your list.")
+            self.__log.warn("You defined more than 4 stations. I only setup the first 4 stations in your list.")
         if len(stations) < 4:
-            self.log.warn("You defined less than 4 stations. I setup the buttons von left to right with your {}"
-                          " stations".format(len(stations)))
+            self.__log.warn("You defined less than 4 stations. I setup the buttons von left to right with your {}"
+                            " stations".format(len(stations)))
 
         num_stations = 4 if len(stations) >= 4 else len(stations)
         for i in range(num_stations):
             ch = WegaRadioControl.RADIO_GPIO_CHANNELS[i]
-            self.stations[ch] = stations[i]
-            self.log.info("register callback for '{}' on channel {}".format(stations[i]['name'], ch))
-            self.gpioClient.add_input_channel_callback(ch, GPIO.RISING, self._switch_to_station)
+            self.__stations[ch] = stations[i]
+            self.__log.info("register callback for '{}' on channel {}".format(stations[i]['name'], ch))
+            self.__gpioClient.add_input_channel_callback(ch, GPIO.RISING, self.__switch_to_station)
 
-    def _switch_off_callback(self):
+    def __switch_off_callback(self):
         """
         Callback function for the off switch
         """
-        self.log.info("switch off the radio")
-        self.mpdClient.stop()
+        self.__log.info("switch off the radio")
+        self.__mpdClient.stop()
 
-    def _switch_to_station(self, channel):
+    def __switch_to_station(self, channel):
         """
         Callback to switch to the station with the given GPIO-Channel
         :param channel: the GPIO-Channel
         """
-        station = self.stations[channel]
-        self.log.info("switch to station: {}".format(station['name']))
-        self.mpdClient.play(station['uri'])
+        station = self.__stations[channel]
+        self.__log.info("switch to station: {}".format(station['name']))
+        self.__mpdClient.play(station['uri'])
 
     def teardown(self):
         """
         This instance is unusable after this call!
         """
-        self.log.info("teardown")
-        self.mpdClient.teardown()
-        self.gpioClient.teardown()
+        self.__log.info("teardown")
+        self.__mpdClient.teardown()
+        self.__gpioClient.teardown()
 
 
 class MyLogger:
     """
     Class to redirect stdout und stderr to the logging files
     """
+
     def __init__(self, logger, level):
         self.logger = logger
         self.level = level
