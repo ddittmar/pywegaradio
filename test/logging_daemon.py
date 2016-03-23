@@ -4,6 +4,7 @@
 import time
 import sys
 import json
+import yaml
 import argparse
 import os
 import logging
@@ -22,8 +23,8 @@ class MyLogger(object):
 
 
 def configure_logging(logging_conf_filename):
-    with open(logging_conf_filename) as logging_json:
-        data = json.load(logging_json)
+    with open(logging_conf_filename) as logging_conf:
+        data = yaml.load(logging_conf)
     logging.config.dictConfig(data)
     global log  # configure a global logger
     log = logging.getLogger("daemon")
@@ -36,7 +37,7 @@ def configure_logging(logging_conf_filename):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="logging deamon")
-    parser.add_argument("-l", "--logging", help="filename of the logging config (JSON)", required=True)
+    parser.add_argument("-l", "--logging", help="filename of the logging config", required=True)
     return parser.parse_args()
 
 if __name__ == '__main__':
