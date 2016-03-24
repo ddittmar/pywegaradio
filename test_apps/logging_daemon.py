@@ -3,7 +3,6 @@
 
 import time
 import sys
-import json
 import yaml
 import argparse
 import os
