@@ -1,0 +1,78 @@
+# configures the logging
+logging:
+  version: 1
+  formatters: 
+    simple: 
+      format: '%(asctime)s (%(name)s) [%(levelname)s]: %(message)s'
+  handlers: 
+    console: 
+      class: logging.StreamHandler
+      level: DEBUG
+      formatter: simple
+      stream: ext://sys.stdout
+    file: 
+      class: logging.handlers.TimedRotatingFileHandler
+      level: DEBUG
+      formatter: simple
+      filename: /var/log/pyWegaRadio.log
+      when: midnight
+      backupCount: 5
+  loggers:
+
+    # logger for the script (global)
+    daemon: 
+      level: DEBUG
+      handlers:
+        - console
+        - file
+      propagate: false
+
+    # logger for the MPD wrapper class
+    MusicDaemonClient: 
+      level: DEBUG
+      handlers:
+        - console
+        - file
+      propagate: false
+
+    # logger for the GPIO wrapper class
+    GpioClient: 
+      level: DEBUG
+      handlers:
+        - console
+        - file
+      propagate: false
+
+    # logger for the control class
+    WegaRadioControl: 
+      level: DEBUG
+      handlers:
+        - console
+        - file
+      propagate: false
+
+    # logger for the MPD-Client module
+    mpd: 
+      level: WARN
+      handlers:
+        - console
+        - file
+      propagate: false
+
+  # the root logger
+  root: 
+    level: DEBUG
+    handlers:
+      - console
+      - file
+
+# The stations of the radio
+stations:
+  - name: Alster Radio
+    uri: http://live96.106acht.de
+  - name: Hamburg Zwei
+    uri: http://stream.hamburg-zwei.de/hh2-live/mp3-192/hh2mediaplayer
+  - name: Absolute Relax
+    uri: http://absolut.hoerradar.de/absolutradio-relax-mp3
+  - name: FFH Weihnachtsradio
+    uri: http://mp3.ffh.de/fs_ffhchannels/hqxmas.mp3

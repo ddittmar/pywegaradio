@@ -3,7 +3,7 @@
 
 import sys
 import time
-import json
+import yaml
 import argparse
 import logging
 import logging.config
@@ -231,7 +231,7 @@ def load_config():
     parser.add_argument("-c", "--config", help="filename of the application config (JSON)", required=True)
     args = parser.parse_args()
     with open(args.config) as application_config:
-        cfg = json.load(application_config)
+        cfg = yaml.load(application_config)
 
     # setting defaults
     cfg['mpd_host'] = cfg['mpd_client'] if 'mpd_host' in cfg else 'localhost'
