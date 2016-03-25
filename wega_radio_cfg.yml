@@ -1,58 +1,54 @@
-# configures the logging
+# configures the python logging module
 logging:
   version: 1
+
+  # formatters for the loggers
   formatters: 
-    simple: 
+    simple: # one simple format for all loggers
       format: '%(asctime)s (%(name)s) [%(levelname)s]: %(message)s'
-  handlers: 
-    console: 
+
+  # logging handlers (targets)
+  handlers:
+    console: # console handler for debugging purposes
       class: logging.StreamHandler
       level: DEBUG
       formatter: simple
       stream: ext://sys.stdout
-    file: 
+    file: # a file handler for the deamon log
       class: logging.handlers.TimedRotatingFileHandler
       level: DEBUG
       formatter: simple
       filename: /var/log/pyWegaRadio.log
       when: midnight
       backupCount: 5
+
+  # configure some loggers
   loggers:
-
-    # logger for the script (global)
-    daemon: 
+    daemon: # logger for the script (deamon log)
       level: DEBUG
       handlers:
         - console
         - file
       propagate: false
-
-    # logger for the MPD wrapper class
-    MusicDaemonClient: 
+    MusicDaemonClient: # logger for the MPD wrapper class
       level: DEBUG
       handlers:
         - console
         - file
       propagate: false
-
-    # logger for the GPIO wrapper class
-    GpioClient: 
+    GpioClient: # logger for the GPIO wrapper class
       level: DEBUG
       handlers:
         - console
         - file
       propagate: false
-
-    # logger for the control class
-    WegaRadioControl: 
+    WegaRadioControl: # logger for the control class
       level: DEBUG
       handlers:
         - console
         - file
       propagate: false
-
-    # logger for the MPD-Client module
-    mpd: 
+    mpd: # logger for the MPD-Client module
       level: WARN
       handlers:
         - console
@@ -60,13 +56,16 @@ logging:
       propagate: false
 
   # the root logger
-  root: 
+  root:
     level: DEBUG
     handlers:
       - console
       - file
 
-# The stations of the radio
+# The stations of the radio.
+#
+# You can configure as many stations as you want but only the first 4 are recognized. The Wega-Radio only has 4 Buttons
+# you know.
 stations:
   - name: Alster Radio
     uri: http://live96.106acht.de
