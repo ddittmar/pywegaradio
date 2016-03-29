@@ -224,11 +224,11 @@ def log_mpd_status(music_daemon_client):
 
 def load_config():
     """
-    load the JSON config file for the application
+    load the YAML config file for the application
     :return: the config dictionary
     """
     parser = argparse.ArgumentParser(description="pyWegaRadio")
-    parser.add_argument("-c", "--config", help="filename of the application config (JSON)", required=True)
+    parser.add_argument("-c", "--config", help="filename of the application config (YAML)", required=True)
     args = parser.parse_args()
     with open(args.config) as application_config:
         cfg = yaml.load(application_config)
