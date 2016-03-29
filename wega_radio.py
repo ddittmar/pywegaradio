@@ -117,7 +117,7 @@ class GpioClient:
         :param rise_fall: fire the callback at a rising edge or a falling edge
         :param callback: the callback to fire
         """
-        self.__log("register callback for channel {}".format(channel))
+        self.__log.debug("register callback for channel {}".format(channel))
         GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(channel, rise_fall, callback=callback, bouncetime=300)
 
