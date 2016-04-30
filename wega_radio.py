@@ -171,7 +171,7 @@ class WegaRadioControl:
             self.__log.info("register callback for '{}' on channel {}".format(stations[i]['name'], ch))
             self.__gpioClient.add_input_channel_callback(ch, GPIO.RISING, self.__switch_to_station)
 
-    def __switch_off_callback(self):
+    def __switch_off_callback(self, _):
         """
         Callback function for the off switch
         """
