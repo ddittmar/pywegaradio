@@ -68,7 +68,7 @@ logging:
 # you know.
 stations:
   - name: Alster Radio
-    uri: http://live96.106acht.de
+    uri: http://95.141.24.159/alsterradio_128
   - name: Hamburg Zwei
     uri: http://stream.hamburg-zwei.de/hh2-live/mp3-192/hh2mediaplayer
   - name: Absolute Relax
