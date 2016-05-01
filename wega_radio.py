@@ -9,6 +9,7 @@ import logging
 import logging.config
 
 from mpd import (MPDClient)
+from threading import Timer
 
 try:
     import RPi.GPIO as GPIO
@@ -72,6 +73,12 @@ class MusicDaemonClient:
         self.__play(uri)
         self.__disconnect()
 
+    def log_info(self):
+        info = self.info()
+        log.info("MPD Status: {}".format(info['status']))
+        log.info("MPD Stats: {}".format(info['stats']))
+        log.info("MPD Current Song: {}".format(info['current_song']))
+
     def info(self):
         self.__connect()
         try:
@@ -121,6 +128,13 @@ class GpioClient:
         GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(channel, rise_fall, callback=callback, bouncetime=300)
 
+    def channel_state(self, channel):
+        """
+        Retrieves the state of the channel
+        :param channel the channel number to retrieve
+        """
+        return GPIO.input(channel)
+
     def teardown(self):
         """
         teardown this instance. GPIO is unusable after this call!
@@ -142,6 +156,7 @@ class WegaRadioControl:
         self.__mpdClient = MusicDaemonClient(config['mpd_host'], config['mpd_port'])
         self.__gpioClient = GpioClient()
         self.__stations = dict()
+        self.__timer = Timer(0.2, self.__set_radio_state)
 
         # configure the station callbacks
         self.__setup_stations(config['stations'])
@@ -149,8 +164,8 @@ class WegaRadioControl:
         # register a callback to switch the radio off
         self.__log.info(
             "register callback for the 'off' button on channel {}".format(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL))
-        self.__gpioClient.add_input_channel_callback(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL, GPIO.FALLING,
-                                                     self.__switch_off_callback)
+        self.__gpioClient.add_input_channel_callback(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL, GPIO.BOTH,
+                                                     self.__on_channel)
 
     def __setup_stations(self, stations):
         """
@@ -169,18 +184,47 @@ class WegaRadioControl:
             ch = WegaRadioControl.RADIO_GPIO_CHANNELS[i]
             self.__stations[ch] = stations[i]
             self.__log.info("register callback for '{}' on channel {}".format(stations[i]['name'], ch))
-            self.__gpioClient.add_input_channel_callback(ch, GPIO.RISING, self.__switch_to_station)
+            self.__gpioClient.add_input_channel_callback(ch, GPIO.BOTH, self.__on_channel)
 
-    def __switch_off_callback(self, _):
+    def __set_radio_state(self):
         """
-        Callback function for the off switch
+        checks the button states and switches the radio in the correct state
+        """
+        if self.__gpioClient.channel_state(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL):
+            for ch in self.__stations:
+                if self.__gpioClient.channel_state(ch):
+                    self.__switch_to_station(ch)
+                    break
+        else:
+            self.__switch_off(WegaRadioControl.SWITCH_OFF_GPIO_CHANNEL)
+        self.__mpdClient.log_info()
+
+    def __debounce_buttons(self):
+        """
+        a helper function to debounce the buttons
+        """
+        self.__timer.cancel()
+        self.__timer = Timer(0.2, self.__set_radio_state)
+        self.__timer.start()
+
+    def __on_channel(self, channel):
+        """
+        callback for all channels
+        :param channel:
+        """
+        self.__log.debug("on channel {}".format(channel))
+        self.__debounce_buttons()
+
+    def __switch_off(self, _):
+        """
+        function for the off switch
         """
         self.__log.info("switch off the radio")
         self.__mpdClient.stop()
 
     def __switch_to_station(self, channel):
         """
-        Callback to switch to the station with the given GPIO-Channel
+        switch to the station with the given GPIO-Channel
         :param channel: the GPIO-Channel
         """
         station = self.__stations[channel]
@@ -192,6 +236,7 @@ class WegaRadioControl:
         This instance is unusable after this call!
         """
         self.__log.info("teardown")
+        self.__timer.cancel()
         self.__mpdClient.teardown()
         self.__gpioClient.teardown()
 
@@ -216,10 +261,7 @@ def log_mpd_status(music_daemon_client):
     Write the status of the MPD to the log
     :param music_daemon_client: the MusicDaemonClient
     """
-    info = music_daemon_client.info()
-    log.info("MPD Status: {}".format(info['status']))
-    log.info("MPD Stats: {}".format(info['stats']))
-    log.info("MPD Current Song: {}".format(info['current_song']))
+    music_daemon_client.log_info()
 
 
 def load_config():
